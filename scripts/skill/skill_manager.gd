@@ -22,6 +22,12 @@ func load_kit_for_character(character_name: String) -> void:
 		"ye_zhen":
 			for s in YeZhenKit.build_skills():
 				register_skill(s)
+		"zhang_xianguang":
+			for s in ZhangXianguangKit.build_skills():
+				register_skill(s)
+		"li_leping":
+			for s in LiLepingKit.build_skills():
+				register_skill(s)
 		"placeholder_enemy":
 			for s in PlaceholderKit.build_skills():
 				register_skill(s)
@@ -86,22 +92,38 @@ func try_cast_from_input() -> bool:
 			return cast("gui_yu")
 		if skills.has("tie_bi"):
 			return cast("tie_bi")
+		if skills.has("gui_jiao"):
+			return cast("gui_jiao")
+		if skills.has("gui_yan_smoke"):
+			return cast("gui_yan_smoke")
 	if ic.skill_suppress_pressed:
 		ic.skill_suppress_pressed = false
 		if skills.has("gui_yan"):
 			return cast("gui_yan")
 		if skills.has("ba_ti"):
 			return cast("ba_ti")
+		if skills.has("hua_ying"):
+			return cast("hua_ying")
+		if skills.has("meng_you"):
+			return cast("meng_you")
 	if ic.skill_2_pressed:
 		ic.skill_2_pressed = false
 		if skills.has("gui_ying"):
 			return cast("gui_ying")
 		if skills.has("beng_quan"):
 			return cast("beng_quan")
+		if skills.has("ying_fen"):
+			return cast("ying_fen")
+		if skills.has("zhao_ren"):
+			return cast("zhao_ren")
 	if ic.skill_1_pressed:
 		ic.skill_1_pressed = false
 		if skills.has("gui_shou"):
 			return cast("gui_shou")
 		if skills.has("tie_chong"):
 			return cast("tie_chong")
+		if skills.has("ying_dun"):
+			return cast("ying_dun")
+		if skills.has("yi_wang"):
+			return cast("yi_wang")
 	return false

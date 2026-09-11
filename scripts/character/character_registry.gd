@@ -2,7 +2,7 @@ class_name CharacterRegistry
 extends RefCounted
 ## Roster lookup for menu + battle spawn.
 
-const IDs := ["yangjian", "ye_zhen", "placeholder_enemy"]
+const IDs := ["yangjian", "ye_zhen", "zhang_xianguang", "li_leping", "placeholder_enemy"]
 
 static func display_name(id: String) -> String:
 	match id:
@@ -10,6 +10,10 @@ static func display_name(id: String) -> String:
 			return "杨间"
 		"ye_zhen":
 			return "叶真"
+		"zhang_xianguang":
+			return "张羡光"
+		"li_leping":
+			return "李乐平"
 		"placeholder_enemy":
 			return "占位敌人"
 	return id
@@ -20,6 +24,10 @@ static func blurb(id: String) -> String:
 			return "综合 · 鬼域控制 · 高机动"
 		"ye_zhen":
 			return "近战 · 高防 · 霸体爆发"
+		"zhang_xianguang":
+			return "机动 · 影遁分身 · 鬼教室"
+		"li_leping":
+			return "暗杀 · 标记 · 鬼烟隐身"
 		"placeholder_enemy":
 			return "测试用灵异木偶"
 	return ""
@@ -30,6 +38,10 @@ static func color(id: String) -> Color:
 			return Color(0.2, 0.42, 0.92)
 		"ye_zhen":
 			return Color(0.92, 0.55, 0.12)
+		"zhang_xianguang":
+			return Color(0.15, 0.15, 0.18)
+		"li_leping":
+			return Color(0.45, 0.2, 0.7)
 		"placeholder_enemy":
 			return Color(0.85, 0.22, 0.28)
 	return Color.GRAY
@@ -40,6 +52,10 @@ static func sprite_path(id: String) -> String:
 			return "res://assets/sprites/yangjian.png"
 		"ye_zhen":
 			return "res://assets/sprites/ye_zhen.png"
+		"zhang_xianguang":
+			return "res://assets/sprites/zhang_xianguang.png"
+		"li_leping":
+			return "res://assets/sprites/li_leping.png"
 	return ""
 
 static func load_sprite(id: String) -> Texture2D:
@@ -49,7 +65,7 @@ static func load_sprite(id: String) -> Texture2D:
 	return null
 
 static func playable_ids() -> Array[String]:
-	return ["yangjian", "ye_zhen"]
+	return ["yangjian", "ye_zhen", "zhang_xianguang", "li_leping"]
 
 static func build_stats(id: String) -> CharacterStats:
 	match id:
@@ -57,6 +73,10 @@ static func build_stats(id: String) -> CharacterStats:
 			return _yangjian()
 		"ye_zhen":
 			return _ye_zhen()
+		"zhang_xianguang":
+			return _zhang()
+		"li_leping":
+			return _li()
 		_:
 			return _placeholder()
 
@@ -108,6 +128,56 @@ static func _ye_zhen() -> CharacterStats:
 	s.accent_color = Color(1, 0.9, 0.7)
 	s.body_width = 56.0
 	s.body_height = 100.0
+	return s
+
+static func _zhang() -> CharacterStats:
+	var s := CharacterStats.new()
+	s.character_name = "zhang_xianguang"
+	s.display_name = "张羡光"
+	s.max_hp = 980.0
+	s.attack = 1.1
+	s.defense = 0.95
+	s.move_speed = 320.0
+	s.jump_velocity = -650.0
+	s.dash_speed = 600.0
+	s.dash_duration = 0.17
+	s.air_control = 0.75
+	s.max_spirit = 100.0
+	s.max_revival = 100.0
+	s.spirit_gain_on_hit = 8.0
+	s.spirit_gain_on_hurt = 5.0
+	s.revival_gain_on_cast = 7.0
+	s.revival_gain_on_hurt = 3.0
+	s.revival_passive_rate = 0.85
+	s.body_color = Color(0.18, 0.18, 0.22)
+	s.accent_color = Color(0.95, 0.85, 0.35)
+	s.body_width = 52.0
+	s.body_height = 100.0
+	return s
+
+static func _li() -> CharacterStats:
+	var s := CharacterStats.new()
+	s.character_name = "li_leping"
+	s.display_name = "李乐平"
+	s.max_hp = 950.0
+	s.attack = 1.12
+	s.defense = 0.9
+	s.move_speed = 310.0
+	s.jump_velocity = -630.0
+	s.dash_speed = 580.0
+	s.dash_duration = 0.16
+	s.air_control = 0.7
+	s.max_spirit = 100.0
+	s.max_revival = 100.0
+	s.spirit_gain_on_hit = 8.5
+	s.spirit_gain_on_hurt = 5.0
+	s.revival_gain_on_cast = 7.5
+	s.revival_gain_on_hurt = 3.2
+	s.revival_passive_rate = 0.9
+	s.body_color = Color(0.35, 0.18, 0.55)
+	s.accent_color = Color(0.75, 0.55, 1.0)
+	s.body_width = 50.0
+	s.body_height = 98.0
 	return s
 
 static func _placeholder() -> CharacterStats:

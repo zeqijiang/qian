@@ -35,17 +35,31 @@ func _apply_special_effect() -> void:
 	var sid := str(profile.get("name", ""))
 	match et:
 		int(SkillData.EffectType.DOMAIN):
-			# Ye Zhen iron wall uses domain fields as a self-buff shell
 			if sid == "tie_bi":
 				character.apply_invuln_buff(float(profile.get("domain_duration", 1.0)))
 			else:
 				character.start_domain(profile)
+				if sid == "gui_yan_smoke":
+					character.apply_stealth(float(profile.get("domain_duration", 5.0)) * 0.8)
+					var target := Game.get_opponent(character)
+					if target is Character:
+						(target as Character).apply_smoke_slow(float(profile.get("domain_duration", 5.0)))
 		int(SkillData.EffectType.GHOST_SHADOW):
 			character.schedule_ghost_followup(profile)
+			if sid == "ying_fen" and CombatFX:
+				CombatFX.show_skill_banner("影子分身", "协同攻击", 0.6)
 		int(SkillData.EffectType.ULTIMATE):
 			if character.stats and character.stats.character_name == "ye_zhen":
 				character.apply_invuln_buff(0.55)
+			if character.stats and character.stats.character_name == "li_leping":
+				# Blow mark for bonus finisher if marked
+				var t := Game.get_opponent(character)
+				if t is Character and (t as Character).marked_left > 0.0:
+					(t as Character).damage_taken_mult = 1.8
 			character.begin_ultimate(profile)
+		int(SkillData.EffectType.SUPPRESS):
+			# Applied on hit via on_landed_hit for mark/classroom
+			pass
 		_:
 			pass
 	if sid == "ba_ti":
@@ -53,6 +67,13 @@ func _apply_special_effect() -> void:
 		character.apply_super_armor(armor_t)
 	if sid == "tie_chong":
 		character.apply_super_armor(float(profile.get("active", 0.14)) + 0.05)
+	if sid in ["ying_dun", "yi_wang"]:
+		character.apply_invuln_buff(float(profile.get("startup", 0.06)) + float(profile.get("active", 0.1)) + 0.05)
+		var target := Game.get_opponent(character)
+		if target is Character:
+			character.teleport_behind(target as Character, 40.0)
+		if CombatFX:
+			CombatFX.show_skill_banner("影遁" if sid == "ying_dun" else "遗忘", "", 0.45)
 
 func physics_process(delta: float) -> void:
 	if not character:

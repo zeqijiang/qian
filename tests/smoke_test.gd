@@ -17,6 +17,7 @@ func _run() -> void:
 	_test_yangjian_kit()
 	_test_ye_zhen_kit()
 	_test_registry()
+	_test_new_kits()
 	if _fails.is_empty():
 		print("=== ALL PASSED ===")
 		quit(0)
@@ -100,10 +101,27 @@ func _test_ye_zhen_kit() -> void:
 			_ok(is_equal_approx(s.spirit_cost, 100.0), "ye zhen ultimate cost")
 
 func _test_registry() -> void:
-	_ok(CharacterRegistry.playable_ids().size() == 2, "two playable fighters")
+	_ok(CharacterRegistry.playable_ids().size() >= 2, "two or more playable fighters")
 	var yj := CharacterRegistry.build_stats("yangjian")
 	var yz := CharacterRegistry.build_stats("ye_zhen")
 	_ok(yz.max_hp > yj.max_hp, "ye zhen tankier")
 	_ok(yz.move_speed < yj.move_speed, "ye zhen slower")
 	_ok(yz.attack > yj.attack, "ye zhen stronger")
 	_ok(CharacterRegistry.display_name("ye_zhen") == "叶真", "ye zhen display name")
+
+func _test_new_kits() -> void:
+	var z := ZhangXianguangKit.build_skills()
+	var l := LiLepingKit.build_skills()
+	_ok(z.size() == 5, "zhang 5 skills")
+	_ok(l.size() == 5, "li 5 skills")
+	var zids: Array[String] = []
+	for s in z:
+		zids.append(s.skill_id)
+	_ok("ying_dun" in zids and "gui_jiao" in zids and "ultimate" in zids, "zhang key skills")
+	var lids: Array[String] = []
+	for s in l:
+		lids.append(s.skill_id)
+	_ok("yi_wang" in lids and "zhao_ren" in lids and "gui_yan_smoke" in lids, "li key skills")
+	_ok(CharacterRegistry.playable_ids().size() == 4, "four playable")
+	_ok(CharacterRegistry.sprite_path("zhang_xianguang").ends_with("zhang_xianguang.png"), "zhang sprite")
+	_ok(CharacterRegistry.sprite_path("li_leping").ends_with("li_leping.png"), "li sprite")

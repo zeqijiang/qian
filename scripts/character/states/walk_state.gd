@@ -14,7 +14,7 @@ func physics_process(delta: float) -> void:
 		return
 	var dir := 0.0
 	if character.input_ctrl:
-		dir = character.input_ctrl.get_move_axis()
+		dir = character.get_move_axis_reversed()
 		character.set_facing(dir)
 	character.velocity.x = dir * character.get_move_speed()
 	character.move_and_slide()

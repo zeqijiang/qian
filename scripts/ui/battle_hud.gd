@@ -68,12 +68,20 @@ func _build_skill_bar(player: Character) -> void:
 	var order := [
 		["gui_shou", "U"],
 		["tie_chong", "U"],
+		["ying_dun", "U"],
+		["yi_wang", "U"],
 		["gui_ying", "I"],
 		["beng_quan", "I"],
+		["ying_fen", "I"],
+		["zhao_ren", "I"],
 		["gui_yu", "O"],
 		["tie_bi", "O"],
+		["gui_jiao", "O"],
+		["gui_yan_smoke", "O"],
 		["gui_yan", "H"],
 		["ba_ti", "H"],
+		["hua_ying", "H"],
+		["meng_you", "H"],
 		["ultimate", "P"],
 	]
 	for pair in order:

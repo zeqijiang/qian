@@ -37,6 +37,12 @@ var domain_slow_mult: float = 1.0
 var suppress_left: float = 0.0
 var armor_left: float = 0.0
 var invuln_buff_left: float = 0.0
+var reverse_controls_left: float = 0.0
+var marked_left: float = 0.0
+var marked_by: Node = null
+var smoke_slow_left: float = 0.0
+var stealth_left: float = 0.0
+var damage_taken_mult: float = 1.0
 var _ultimate_running: bool = false
 
 var state_machine: CharacterStateMachine
@@ -196,6 +202,75 @@ func _tick_suppress(delta: float) -> void:
 		armor_left -= delta
 	if invuln_buff_left > 0.0:
 		invuln_buff_left -= delta
+	if reverse_controls_left > 0.0:
+		reverse_controls_left -= delta
+	if smoke_slow_left > 0.0:
+		smoke_slow_left -= delta
+	if stealth_left > 0.0:
+		stealth_left -= delta
+		if visual:
+			visual.modulate.a = 0.35 if stealth_left > 0.0 else 1.0
+	if marked_left > 0.0:
+		marked_left -= delta
+		# Periodic curse tick every ~1s via accumulator
+		_mark_tick += delta
+		if _mark_tick >= 1.0:
+			_mark_tick = 0.0
+			_apply_mark_tick()
+		if marked_left <= 0.0:
+			damage_taken_mult = 1.0
+			marked_by = null
+
+var _mark_tick: float = 0.0
+
+func apply_reverse_controls(duration: float) -> void:
+	reverse_controls_left = maxf(reverse_controls_left, duration)
+
+func apply_mark(duration: float, source: Node) -> void:
+	marked_left = maxf(marked_left, duration)
+	marked_by = source
+	damage_taken_mult = 1.5
+	_mark_tick = 0.0
+
+func apply_stealth(duration: float) -> void:
+	stealth_left = maxf(stealth_left, duration)
+
+func apply_smoke_slow(duration: float) -> void:
+	smoke_slow_left = maxf(smoke_slow_left, duration)
+
+func is_reverse_controls() -> bool:
+	return reverse_controls_left > 0.0
+
+func get_move_axis_reversed() -> float:
+	if not input_ctrl:
+		return 0.0
+	var a := input_ctrl.get_move_axis()
+	if reverse_controls_left > 0.0:
+		return -a
+	return a
+
+func _apply_mark_tick() -> void:
+	if is_dead:
+		return
+	var dmg := 8.0
+	hp = maxf(0.0, hp - dmg)
+	hp_changed.emit(hp, max_hp)
+	if CombatFX:
+		CombatFX.hit_spark(global_position + Vector2(0, -70), Color(0.9, 0.2, 0.9), 6, 0.5)
+	if hp <= 0.0:
+		_die()
+
+func teleport_behind(target: Character, offset: float = 36.0) -> void:
+	if target == null:
+		return
+	var behind := target.global_position + Vector2(-float(target.facing) * offset, 0)
+	global_position = behind
+	facing = target.facing
+	if visual:
+		visual.set_facing(facing)
+	if CombatFX:
+		CombatFX.afterimage(self, Color(0.4, 0.2, 0.5), 0.25)
+		CombatFX.hit_spark(global_position + Vector2(0, -50), Color(0.55, 0.25, 0.7), 10, 0.7)
 
 func apply_invuln_buff(duration: float) -> void:
 	invuln_buff_left = maxf(invuln_buff_left, duration)
@@ -361,6 +436,34 @@ func on_landed_hit(info: DamageInfo) -> void:
 			if st:
 				dur = st.suppress_duration
 			(target as Character).apply_suppress(dur)
+	# 鬼教室 reverse controls
+	if info and info.attack_name == "gui_jiao":
+		var target := Game.get_opponent(self)
+		if target is Character:
+			var tc: Character = target
+			tc.apply_suppress(0.8)
+			tc.apply_reverse_controls(3.0)
+			if CombatFX:
+				CombatFX.show_skill_banner("鬼教室", "意识错乱", 0.8)
+				CombatFX.set_domain_active(true, Color(0.15, 0.1, 0.2, 0.35))
+				CombatFX.hitstop(0.12, 0.15)
+				get_tree().create_timer(0.9).timeout.connect(func() -> void:
+					if CombatFX:
+						CombatFX.set_domain_active(false)
+				)
+	# 找人鬼 mark
+	if info and info.attack_name == "zhao_ren":
+		var target := Game.get_opponent(self)
+		if target is Character:
+			(target as Character).apply_mark(8.0, self)
+			if CombatFX:
+				CombatFX.show_skill_banner("找到你了", "标记 8s", 0.7)
+	# 遗忘 drain spirit
+	if info and info.attack_name == "yi_wang":
+		var target := Game.get_opponent(self)
+		if target is Character and (target as Character).energy:
+			(target as Character).energy.spirit = maxf(0.0, (target as Character).energy.spirit - 20.0)
+			(target as Character).energy.spirit_changed.emit((target as Character).energy.spirit, (target as Character).energy.max_spirit)
 
 func apply_gravity(delta: float) -> void:
 	if not is_on_floor():
@@ -442,8 +545,16 @@ func _apply_block(info: DamageInfo, _attacker: Character) -> void:
 		_die()
 
 func _apply_damage(info: DamageInfo, attacker: Character) -> void:
-	var def_mod := 1.0 / maxf(stats.defense, 0.01) * defense_modifier
+	var def_mod := 1.0 / maxf(stats.defense, 0.01) * defense_modifier * damage_taken_mult
 	var dmg := info.compute_damage(def_mod, state_modifier)
+	# Li Leping mark boosts damage taken further via damage_taken_mult
+	if attacker and attacker is Character:
+		var ac: Character = attacker
+		if ac.marked_left > 0.0 and ac.marked_by == self:
+			# attacker marked us — already in damage_taken_mult
+			pass
+		if attacker.stats and attacker.stats.character_name == "li_leping" and marked_left > 0.0:
+			dmg *= 1.5
 	hp = maxf(0.0, hp - dmg)
 	hp_changed.emit(hp, max_hp)
 	_spawn_damage_popup(dmg, info)

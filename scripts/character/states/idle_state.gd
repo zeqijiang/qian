@@ -22,7 +22,7 @@ func physics_process(delta: float) -> void:
 	if character.skills and character.skills.try_cast_from_input():
 		return
 	if character.input_ctrl:
-		var dir := character.input_ctrl.get_move_axis()
+		var dir := character.get_move_axis_reversed()
 		if absf(dir) > 0.1:
 			state_machine.force_change("Walk")
 		elif character.input_ctrl.jump_pressed:

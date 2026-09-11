@@ -27,7 +27,7 @@ var _e_sprite: TextureRect
 
 func _ready() -> void:
 	_roster = CharacterRegistry.playable_ids()
-	_enemies = ["placeholder_enemy", "yangjian", "ye_zhen"]
+	_enemies = ["placeholder_enemy", "yangjian", "ye_zhen", "zhang_xianguang", "li_leping"]
 	_mode_label.text = "训练场" if Game.prefer_training else "VS AI"
 	_title.text = "选择角色"
 	_hint.text = "A/D 换角色 · Enter 开始 · Esc 返回"
