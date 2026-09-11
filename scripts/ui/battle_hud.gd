@@ -188,6 +188,8 @@ func _update_debug() -> void:
 		parts.append("INVINCIBLE")
 	if Debug.infinite_energy:
 		parts.append("INF_ENERGY")
+	if Debug.dummy_mode:
+		parts.append("DUMMY")
 	if Debug.show_hitbox:
 		parts.append("HITBOX")
 	if Debug.show_hurtbox:

@@ -376,6 +376,8 @@ func is_airborne() -> bool:
 func on_hit_received(info: DamageInfo, attacker: Character) -> void:
 	if is_dead or invulnerable:
 		return
+	if Debug.invincible and is_player_controlled:
+		return
 	if is_blocking and not info.unblockable:
 		_apply_block(info, attacker)
 		return
