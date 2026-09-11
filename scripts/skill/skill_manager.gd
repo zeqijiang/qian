@@ -68,6 +68,8 @@ func cast(skill_id: String) -> bool:
 	if st is SkillState:
 		st.configure(data.to_profile())
 		character.state_machine.force_change("Skill")
+		if CombatFX:
+			CombatFX.notify_skill_cast(character, skill_id, data.display_name)
 		return true
 	return false
 

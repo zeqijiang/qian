@@ -11,6 +11,7 @@ const CharacterScene := preload("res://scenes/character/character.tscn")
 @onready var player_spawn: Marker2D = $PlayerSpawn
 @onready var enemy_spawn: Marker2D = $EnemySpawn
 @onready var hud: BattleHUD = $HUD
+@onready var camera: Camera2D = $Camera2D
 
 var player: Character
 var enemy: Character
@@ -19,6 +20,10 @@ var _battle_over: bool = false
 func _ready() -> void:
 	training = Game.prefer_training
 	Game.start_battle(Game.GameMode.TRAINING if training else Game.GameMode.AI_BATTLE)
+	if CombatFX:
+		CombatFX.bind_camera(camera)
+		CombatFX.ensure_fx_root(self)
+		CombatFX.set_domain_active(false)
 	_spawn_fighters()
 	hud.bind(player, enemy)
 	_apply_training_flags()

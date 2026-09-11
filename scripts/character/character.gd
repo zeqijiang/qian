@@ -209,6 +209,8 @@ func start_domain(profile: Dictionary) -> void:
 			(c as Character).apply_domain_slow(slow, domain_timer)
 	if visual:
 		visual.set_domain(true)
+	if CombatFX and is_player_controlled:
+		CombatFX.set_domain_active(true, Color(0.45, 0.08, 0.6, 0.28))
 	domain_changed.emit(true)
 
 func end_domain() -> void:
@@ -218,6 +220,8 @@ func end_domain() -> void:
 	domain_damage_mult = 1.0
 	if visual:
 		visual.set_domain(false)
+	if CombatFX and is_player_controlled:
+		CombatFX.notify_domain_end()
 	domain_changed.emit(false)
 
 func apply_domain_slow(mult: float, duration: float) -> void:
@@ -252,12 +256,10 @@ func _fire_ghost_strike(at: Vector2, damage: float, hitstun: float, reach: float
 	var tc: Character = target
 	if tc.is_dead or tc.invulnerable:
 		return
-	# Ghost strike is a delayed point hit: range check + apply damage pipeline.
 	var dx := tc.global_position.x - at.x
 	if absf(dx) > reach + 40.0:
 		return
 	if signf(dx) != 0.0 and signf(dir) != 0.0 and signf(dx) != signf(dir):
-		# Allow slight cross-up for ghost style; still require roughly in front unless very close.
 		if absf(dx) > 30.0:
 			return
 	var info := DamageInfo.new()
@@ -269,7 +271,10 @@ func _fire_ghost_strike(at: Vector2, damage: float, hitstun: float, reach: float
 	tc.on_hit_received(info, self)
 	combat.combo.register_hit("gui_ying_followup", damage)
 	energy.add_spirit(stats.spirit_gain_on_hit)
-	# Ghost flash on caster
+	if CombatFX:
+		CombatFX.slash_arc(at + Vector2(0, -40), facing, Color(0.7, 0.4, 1.0), 80.0)
+		CombatFX.hit_spark(at + Vector2(0, -40), Color(0.75, 0.45, 1.0), 12, 1.1)
+		CombatFX.shake(5.0)
 	if visual:
 		visual.set_flash(0.5)
 
@@ -374,7 +379,8 @@ func land() -> void:
 	can_air_dash = true
 
 func start_dash_trail() -> void:
-	pass
+	if CombatFX:
+		CombatFX.notify_dash(self)
 
 func set_invulnerable(v: bool) -> void:
 	invulnerable = v
@@ -397,11 +403,13 @@ func on_hit_received(info: DamageInfo, attacker: Character) -> void:
 		return
 	if armor_left > 0.0:
 		# Super armor: take damage, ignore hitstun/knockdown
-		var def_mod := 1.0 / maxf(stats.defense, 0.01) * defense_modifier
-		var dmg := info.compute_damage(def_mod, state_modifier)
-		hp = maxf(0.0, hp - dmg)
+		var def_mod_a := 1.0 / maxf(stats.defense, 0.01) * defense_modifier
+		var dmg_a := info.compute_damage(def_mod_a, state_modifier)
+		hp = maxf(0.0, hp - dmg_a)
 		hp_changed.emit(hp, max_hp)
-		_spawn_damage_popup(dmg, info)
+		_spawn_damage_popup(dmg_a, info)
+		if CombatFX:
+			CombatFX.notify_hit(attacker, self, info, dmg_a)
 		_flash_visual(0.35)
 		if energy:
 			energy.add_spirit(stats.spirit_gain_on_hurt * 0.5)
@@ -431,6 +439,8 @@ func _apply_damage(info: DamageInfo, attacker: Character) -> void:
 	hp = maxf(0.0, hp - dmg)
 	hp_changed.emit(hp, max_hp)
 	_spawn_damage_popup(dmg, info)
+	if CombatFX:
+		CombatFX.notify_hit(attacker, self, info, dmg)
 
 	if energy:
 		energy.add_spirit(stats.spirit_gain_on_hurt)
