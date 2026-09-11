@@ -67,13 +67,20 @@ func _apply_special_effect() -> void:
 		character.apply_super_armor(armor_t)
 	if sid == "tie_chong":
 		character.apply_super_armor(float(profile.get("active", 0.14)) + 0.05)
-	if sid in ["ying_dun", "yi_wang"]:
+	if sid in ["ying_dun", "yi_wang", "gui_ding_wei"]:
 		character.apply_invuln_buff(float(profile.get("startup", 0.06)) + float(profile.get("active", 0.1)) + 0.05)
 		var target := Game.get_opponent(character)
 		if target is Character:
 			character.teleport_behind(target as Character, 40.0)
 		if CombatFX:
-			CombatFX.show_skill_banner("影遁" if sid == "ying_dun" else "遗忘", "", 0.45)
+			var banner := "影遁"
+			if sid == "yi_wang":
+				banner = "遗忘"
+			elif sid == "gui_ding_wei":
+				banner = "鬼眼定位"
+			CombatFX.show_skill_banner(banner, "", 0.45)
+	if sid == "gui_quan":
+		character.apply_super_armor(float(profile.get("active", 0.14)) + 0.08)
 
 func physics_process(delta: float) -> void:
 	if not character:

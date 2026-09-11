@@ -66,22 +66,29 @@ func _build_skill_bar(player: Character) -> void:
 	box.add_theme_constant_override("separation", 8)
 	root.add_child(box)
 	var order := [
+		["gui_ding_wei", "U"],
 		["gui_shou", "U"],
+		["gui_quan", "U"],
 		["tie_chong", "U"],
 		["ying_dun", "U"],
 		["yi_wang", "U"],
+		["deng_chuan", "U"],
 		["gui_ying", "I"],
+		["gui_yu", "I"],
 		["beng_quan", "I"],
 		["ying_fen", "I"],
 		["zhao_ren", "I"],
-		["gui_yu", "O"],
+		["li_gui", "I"],
 		["tie_bi", "O"],
+		["guan_cai_ding", "O"],
 		["gui_jiao", "O"],
 		["gui_yan_smoke", "O"],
+		["hai_shui", "O"],
 		["gui_yan", "H"],
 		["ba_ti", "H"],
 		["hua_ying", "H"],
 		["meng_you", "H"],
+		["lang_yong", "H"],
 		["ultimate", "P"],
 	]
 	for pair in order:

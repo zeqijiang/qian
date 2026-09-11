@@ -13,11 +13,12 @@ func _ready() -> void:
 	_sub.text = "可玩原型 · Phase 0-1"
 	_btn_train.pressed.connect(func() -> void:
 		Game.prefer_training = true
-		Game.selected_enemy_id = "placeholder_enemy"
+		Game.selected_enemy_id = CharacterRegistry.villain_id()
 		get_tree().change_scene_to_file("res://scenes/ui/character_select.tscn")
 	)
 	_btn_vs.pressed.connect(func() -> void:
 		Game.prefer_training = false
+		Game.selected_enemy_id = CharacterRegistry.villain_id()
 		get_tree().change_scene_to_file("res://scenes/ui/character_select.tscn")
 	)
 	_btn_quit.pressed.connect(func() -> void:

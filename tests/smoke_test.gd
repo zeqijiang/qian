@@ -74,10 +74,10 @@ func _test_yangjian_kit() -> void:
 		ids.append(s.skill_id)
 		var p := s.to_profile()
 		_ok(p.has("spirit_cost") and p.has("effect_type"), "profile keys for " + s.skill_id)
-	_ok("gui_shou" in ids, "has gui_shou")
+	_ok("gui_ding_wei" in ids, "has gui_ding_wei")
 	_ok("gui_ying" in ids, "has gui_ying")
 	_ok("gui_yu" in ids, "has gui_yu")
-	_ok("gui_yan" in ids, "has gui_yan")
+	_ok("guan_cai_ding" in ids, "has guan_cai_ding")
 	_ok("ultimate" in ids, "has ultimate")
 	for s in skills:
 		if s.skill_id == "ultimate":
@@ -91,7 +91,7 @@ func _test_ye_zhen_kit() -> void:
 	var ids: Array[String] = []
 	for s in skills:
 		ids.append(s.skill_id)
-	_ok("tie_chong" in ids, "has tie_chong")
+	_ok("gui_quan" in ids or "tie_chong" in ids, "has charge skill")
 	_ok("beng_quan" in ids, "has beng_quan")
 	_ok("tie_bi" in ids, "has tie_bi")
 	_ok("ba_ti" in ids, "has ba_ti")
@@ -122,6 +122,13 @@ func _test_new_kits() -> void:
 	for s in l:
 		lids.append(s.skill_id)
 	_ok("yi_wang" in lids and "zhao_ren" in lids and "gui_yan_smoke" in lids, "li key skills")
-	_ok(CharacterRegistry.playable_ids().size() == 4, "four playable")
+	_ok(CharacterRegistry.playable_ids().size() >= 4, "four or more playable")
+	_ok(CharacterRegistry.villain_id() == "captain", "default villain captain")
+	var cap := CaptainKit.build_skills()
+	_ok(cap.size() == 5, "captain 5 skills")
+	var cids: Array[String] = []
+	for s in cap:
+		cids.append(s.skill_id)
+	_ok("deng_chuan" in cids and "hai_shui" in cids and "ultimate" in cids, "captain key skills")
 	_ok(CharacterRegistry.sprite_path("zhang_xianguang").ends_with("zhang_xianguang.png"), "zhang sprite")
 	_ok(CharacterRegistry.sprite_path("li_leping").ends_with("li_leping.png"), "li sprite")

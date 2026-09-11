@@ -5,10 +5,10 @@ extends RefCounted
 static func build_skills() -> Array[SkillData]:
 	var out: Array[SkillData] = []
 
-	# 铁冲 — armored charge
+	# 鬼拳·镇压 — armored charge with stun
 	var charge := SkillData.new()
-	charge.skill_id = "tie_chong"
-	charge.display_name = "铁冲"
+	charge.skill_id = "gui_quan"
+	charge.display_name = "鬼拳镇压"
 	charge.effect_type = SkillData.EffectType.DAMAGE
 	charge.spirit_cost = 20.0
 	charge.cooldown = 0.6

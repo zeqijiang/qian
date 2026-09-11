@@ -48,6 +48,8 @@ static func sprite_path_for(character_name: String) -> String:
 			return "res://assets/sprites/zhang_xianguang.png"
 		"li_leping":
 			return "res://assets/sprites/li_leping.png"
+		"captain":
+			return "res://assets/sprites/captain.png"
 	return ""
 
 func _setup_fallback_rect() -> void:

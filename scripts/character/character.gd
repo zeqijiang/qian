@@ -464,6 +464,43 @@ func on_landed_hit(info: DamageInfo) -> void:
 		if target is Character and (target as Character).energy:
 			(target as Character).energy.spirit = maxf(0.0, (target as Character).energy.spirit - 20.0)
 			(target as Character).energy.spirit_changed.emit((target as Character).energy.spirit, (target as Character).energy.max_spirit)
+	# 登船扣押 — pull toward captain
+	if info and info.attack_name == "deng_chuan":
+		var target := Game.get_opponent(self)
+		if target is Character:
+			var tc: Character = target
+			tc.velocity.x = signf(global_position.x - tc.global_position.x) * 280.0
+			tc.apply_suppress(0.8)
+			if CombatFX:
+				CombatFX.show_skill_banner("登船规则", "扣押", 0.6)
+	# 灵异海水 wash spirit on hit
+	if info and info.attack_name == "hai_shui":
+		var target := Game.get_opponent(self)
+		if target is Character and (target as Character).energy:
+			var te: EnergyManager = (target as Character).energy
+			te.spirit = maxf(0.0, te.spirit - 30.0)
+			te.spirit_changed.emit(te.spirit, te.max_spirit)
+			if CombatFX:
+				CombatFX.show_skill_banner("灵异海水", "冲刷灵力", 0.55)
+	# 棺材钉 — seal skills briefly (spirit zero + short suppress)
+	if info and info.attack_name == "guan_cai_ding":
+		var target := Game.get_opponent(self)
+		if target is Character:
+			var tc2: Character = target
+			if tc2.energy:
+				tc2.energy.spirit = 0.0
+				tc2.energy.spirit_changed.emit(0.0, tc2.energy.max_spirit)
+			tc2.apply_suppress(2.0)
+			if CombatFX:
+				CombatFX.show_skill_banner("棺材钉", "灵异封禁 2s", 0.9)
+				CombatFX.hitstop(0.12, 0.12)
+	# 鬼拳·镇压 — short stun (reuse suppress as dead-machine)
+	if info and info.attack_name == "gui_quan":
+		var target := Game.get_opponent(self)
+		if target is Character:
+			(target as Character).apply_suppress(1.2)
+			if CombatFX:
+				CombatFX.show_skill_banner("鬼拳", "死机", 0.45)
 
 func apply_gravity(delta: float) -> void:
 	if not is_on_floor():

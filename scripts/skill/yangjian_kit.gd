@@ -5,23 +5,64 @@ extends RefCounted
 static func build_skills() -> Array[SkillData]:
 	var out: Array[SkillData] = []
 
-	var hand := SkillData.new()
-	hand.skill_id = "gui_shou"
-	hand.display_name = "鬼手"
-	hand.effect_type = SkillData.EffectType.GHOST_HAND
-	hand.spirit_cost = 20.0
-	hand.cooldown = 0.45
-	hand.startup = 0.08
-	hand.active = 0.1
-	hand.recovery = 0.18
-	hand.damage = 42.0
-	hand.hitstun = 0.38
-	hand.knockback = 40.0
-	hand.reach = 78.0
-	hand.pull_force = 320.0
-	hand.revival_side_effect = 5.0
-	out.append(hand)
+	# U 鬼眼·定位 — lock and blink to target
+	var locate := SkillData.new()
+	locate.skill_id = "gui_ding_wei"
+	locate.display_name = "鬼眼定位"
+	locate.effect_type = SkillData.EffectType.DAMAGE
+	locate.spirit_cost = 20.0
+	locate.cooldown = 0.4
+	locate.startup = 0.06
+	locate.active = 0.1
+	locate.recovery = 0.14
+	locate.damage = 40.0
+	locate.hitstun = 0.3
+	locate.knockback = 100.0
+	locate.reach = 90.0
+	locate.revival_side_effect = 5.0
+	out.append(locate)
 
+	# I 鬼域·红雾
+	var domain := SkillData.new()
+	domain.skill_id = "gui_yu"
+	domain.display_name = "鬼域红雾"
+	domain.effect_type = SkillData.EffectType.DOMAIN
+	domain.spirit_cost = 35.0
+	domain.cooldown = 4.0
+	domain.startup = 0.2
+	domain.active = 0.0
+	domain.recovery = 0.22
+	domain.damage = 10.0
+	domain.hitstun = 0.1
+	domain.knockback = 60.0
+	domain.reach = 120.0
+	domain.domain_duration = 6.0
+	domain.domain_speed_mult = 1.25
+	domain.domain_damage_mult = 1.2
+	domain.domain_enemy_slow = 0.75
+	domain.revival_side_effect = 12.0
+	out.append(domain)
+
+	# O 棺材钉·锁死
+	var nail := SkillData.new()
+	nail.skill_id = "guan_cai_ding"
+	nail.display_name = "棺材钉"
+	nail.effect_type = SkillData.EffectType.SUPPRESS
+	nail.spirit_cost = 35.0
+	nail.cooldown = 2.5
+	nail.startup = 0.14
+	nail.active = 0.1
+	nail.recovery = 0.24
+	nail.damage = 30.0
+	nail.hitstun = 0.25
+	nail.knockback = 20.0
+	nail.reach = 100.0
+	nail.suppress_duration = 2.0
+	nail.unblockable = true
+	nail.revival_side_effect = 10.0
+	out.append(nail)
+
+	# H 鬼影
 	var shadow := SkillData.new()
 	shadow.skill_id = "gui_ying"
 	shadow.display_name = "鬼影"
@@ -43,47 +84,10 @@ static func build_skills() -> Array[SkillData]:
 	shadow.revival_side_effect = 7.0
 	out.append(shadow)
 
-	var domain := SkillData.new()
-	domain.skill_id = "gui_yu"
-	domain.display_name = "鬼域"
-	domain.effect_type = SkillData.EffectType.DOMAIN
-	domain.spirit_cost = 35.0
-	domain.cooldown = 4.0
-	domain.startup = 0.2
-	domain.active = 0.0
-	domain.recovery = 0.22
-	domain.damage = 10.0
-	domain.hitstun = 0.1
-	domain.knockback = 60.0
-	domain.reach = 120.0
-	domain.domain_duration = 6.0
-	domain.domain_speed_mult = 1.25
-	domain.domain_damage_mult = 1.2
-	domain.domain_enemy_slow = 0.75
-	domain.revival_side_effect = 12.0
-	out.append(domain)
-
-	var eye := SkillData.new()
-	eye.skill_id = "gui_yan"
-	eye.display_name = "鬼眼压制"
-	eye.effect_type = SkillData.EffectType.SUPPRESS
-	eye.spirit_cost = 30.0
-	eye.cooldown = 1.2
-	eye.startup = 0.12
-	eye.active = 0.08
-	eye.recovery = 0.2
-	eye.damage = 18.0
-	eye.hitstun = 0.2
-	eye.knockback = 20.0
-	eye.reach = 110.0
-	eye.suppress_duration = 0.75
-	eye.unblockable = true
-	eye.revival_side_effect = 8.0
-	out.append(eye)
-
+	# P 奥义
 	var ult := SkillData.new()
 	ult.skill_id = "ultimate"
-	ult.display_name = "多重灵异压制"
+	ult.display_name = "无解封印"
 	ult.effect_type = SkillData.EffectType.ULTIMATE
 	ult.spirit_cost = 100.0
 	ult.cooldown = 8.0

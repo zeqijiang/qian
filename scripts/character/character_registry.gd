@@ -2,7 +2,7 @@ class_name CharacterRegistry
 extends RefCounted
 ## Roster lookup for menu + battle spawn.
 
-const IDs := ["yangjian", "ye_zhen", "zhang_xianguang", "li_leping", "placeholder_enemy"]
+const IDs := ["yangjian", "ye_zhen", "zhang_xianguang", "li_leping", "captain", "placeholder_enemy"]
 
 static func display_name(id: String) -> String:
 	match id:
@@ -14,6 +14,8 @@ static func display_name(id: String) -> String:
 			return "张羡光"
 		"li_leping":
 			return "李乐平"
+		"captain":
+			return "船长"
 		"placeholder_enemy":
 			return "占位敌人"
 	return id
@@ -28,6 +30,8 @@ static func blurb(id: String) -> String:
 			return "机动 · 影遁分身 · 鬼教室"
 		"li_leping":
 			return "暗杀 · 标记 · 鬼烟隐身"
+		"captain":
+			return "反派 · 登船规则 · 海水冲刷 · 厉鬼潮"
 		"placeholder_enemy":
 			return "测试用灵异木偶"
 	return ""
@@ -42,6 +46,8 @@ static func color(id: String) -> Color:
 			return Color(0.15, 0.15, 0.18)
 		"li_leping":
 			return Color(0.45, 0.2, 0.7)
+		"captain":
+			return Color(0.12, 0.28, 0.35)
 		"placeholder_enemy":
 			return Color(0.85, 0.22, 0.28)
 	return Color.GRAY
@@ -56,6 +62,8 @@ static func sprite_path(id: String) -> String:
 			return "res://assets/sprites/zhang_xianguang.png"
 		"li_leping":
 			return "res://assets/sprites/li_leping.png"
+		"captain":
+			return "res://assets/sprites/captain.png"
 	return ""
 
 static func load_sprite(id: String) -> Texture2D:
@@ -65,7 +73,10 @@ static func load_sprite(id: String) -> Texture2D:
 	return null
 
 static func playable_ids() -> Array[String]:
-	return ["yangjian", "ye_zhen", "zhang_xianguang", "li_leping"]
+	return ["yangjian", "ye_zhen", "zhang_xianguang", "li_leping", "captain"]
+
+static func villain_id() -> String:
+	return "captain"
 
 static func build_stats(id: String) -> CharacterStats:
 	match id:
@@ -77,6 +88,8 @@ static func build_stats(id: String) -> CharacterStats:
 			return _zhang()
 		"li_leping":
 			return _li()
+		"captain":
+			return _captain()
 		_:
 			return _placeholder()
 
@@ -178,6 +191,31 @@ static func _li() -> CharacterStats:
 	s.accent_color = Color(0.75, 0.55, 1.0)
 	s.body_width = 50.0
 	s.body_height = 98.0
+	return s
+
+static func _captain() -> CharacterStats:
+	var s := CharacterStats.new()
+	s.character_name = "captain"
+	s.display_name = "船长"
+	s.max_hp = 1200.0
+	s.attack = 1.08
+	s.defense = 1.15
+	s.move_speed = 270.0
+	s.jump_velocity = -600.0
+	s.dash_speed = 500.0
+	s.dash_duration = 0.18
+	s.air_control = 0.55
+	s.max_spirit = 100.0
+	s.max_revival = 100.0
+	s.spirit_gain_on_hit = 9.0
+	s.spirit_gain_on_hurt = 6.0
+	s.revival_gain_on_cast = 7.0
+	s.revival_gain_on_hurt = 3.5
+	s.revival_passive_rate = 0.9
+	s.body_color = Color(0.12, 0.28, 0.35)
+	s.accent_color = Color(0.35, 0.75, 0.85)
+	s.body_width = 60.0
+	s.body_height = 108.0
 	return s
 
 static func _placeholder() -> CharacterStats:
