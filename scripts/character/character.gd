@@ -398,6 +398,7 @@ func _apply_damage(info: DamageInfo, attacker: Character) -> void:
 	var dmg := info.compute_damage(def_mod, state_modifier)
 	hp = maxf(0.0, hp - dmg)
 	hp_changed.emit(hp, max_hp)
+	_spawn_damage_popup(dmg, info)
 
 	if energy:
 		energy.add_spirit(stats.spirit_gain_on_hurt)
@@ -444,6 +445,18 @@ func _die() -> void:
 func _flash_visual(amount: float) -> void:
 	if visual:
 		visual.set_flash(amount)
+
+func _spawn_damage_popup(dmg: float, info: DamageInfo) -> void:
+	var parent := get_parent()
+	if parent == null:
+		return
+	var crit := dmg >= 45.0 or (info and info.launch)
+	var col := Color(1.0, 0.85, 0.35) if crit else Color(1.0, 0.55, 0.45)
+	var at := global_position + Vector2(randf_range(-12, 12), -body_top())
+	DamagePopup.spawn(parent, at, str(int(round(dmg))), col, crit)
+
+func body_top() -> float:
+	return stats.body_height if stats else 96.0
 
 func reset_for_training(spawn: Vector2) -> void:
 	global_position = spawn

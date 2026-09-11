@@ -18,6 +18,9 @@ func load_kit_for_character(character_name: String) -> void:
 	if character_name == "yangjian":
 		for s in YangJianKit.build_skills():
 			register_skill(s)
+	elif character_name == "placeholder_enemy":
+		for s in PlaceholderKit.build_skills():
+			register_skill(s)
 
 func _process(delta: float) -> void:
 	for id in cooldowns:
