@@ -34,7 +34,7 @@ func start_attack(profile: Dictionary) -> void:
 	_current_damage.attack_name = str(profile.get("name", "attack"))
 	_current_damage.unblockable = bool(profile.get("unblockable", false))
 	if character and character.stats:
-		_current_damage.skill_multiplier = character.stats.attack
+		_current_damage.skill_multiplier = character.stats.attack * character.get_effective_damage_multiplier()
 		if character.energy and character.energy.revival_active:
 			_current_damage.skill_multiplier *= 1.15
 

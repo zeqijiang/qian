@@ -8,15 +8,22 @@ func physics_process(delta: float) -> void:
 	if not character:
 		return
 	character.apply_gravity(delta)
+	if character.is_suppressed():
+		character.velocity.x = 0.0
+		character.move_and_slide()
+		return
 	var dir := 0.0
 	if character.input_ctrl:
 		dir = character.input_ctrl.get_move_axis()
 		character.set_facing(dir)
-	character.velocity.x = dir * character.stats.move_speed
+	character.velocity.x = dir * character.get_move_speed()
 	character.move_and_slide()
 
 	if not character.is_on_floor():
 		state_machine.force_change("Fall")
+		return
+
+	if character.skills and character.skills.try_cast_from_input():
 		return
 
 	if character.input_ctrl:

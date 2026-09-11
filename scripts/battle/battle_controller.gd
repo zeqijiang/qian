@@ -23,10 +23,10 @@ func _ready() -> void:
 	hud.bind(player, enemy)
 	if training:
 		hud.set_mode_text("TRAINING")
-		hud.set_hints("WASD/方向键移动  Space/W跳  Shift/L冲刺  J轻攻击  K重攻击  ←格挡  F1-F7调试  F5重置")
+		hud.set_hints("AD移动 W跳 Shift冲刺 J轻K重 ←格挡 | U鬼手 I鬼影 O鬼域 H压制 P奥义 | F7无限灵异")
 	else:
 		hud.set_mode_text("VS AI")
-		hud.set_hints("J轻攻击  K重攻击  ←格挡  Shift冲刺  F5重置")
+		hud.set_hints("J轻 K重 ←格挡 Shift冲刺 | U/I/O/H/P 技能 | F5重置")
 	if not training:
 		hud.start_timer(round_time)
 	Game.battle_ended.connect(_on_battle_ended)

@@ -5,14 +5,14 @@ func enter() -> void:
 	if profile.is_empty():
 		configure({
 			"name": "air",
-			"startup": 0.08,
-			"active": 0.12,
-			"recovery": 0.2,
-			"cancel_window": 0.05,
+			"startup": 0.05,
+			"active": 0.10,
+			"recovery": 0.12,
+			"cancel_window": 0.08,
 			"damage": 30.0,
 			"hitstun": 0.22,
 			"knockback": 110.0,
-			"reach": 60.0,
+			"reach": 62.0,
 			"spirit_gain": 10.0,
 		})
 	super.enter()
@@ -26,9 +26,9 @@ func physics_process(delta: float) -> void:
 		character.velocity.x = dir * character.stats.move_speed * character.stats.air_control * 0.5
 	character.move_and_slide()
 
-	var startup: float = float(profile.get("startup", 0.08))
-	var active: float = float(profile.get("active", 0.1))
-	var recovery: float = float(profile.get("recovery", 0.2))
+	var startup: float = float(profile.get("startup", 0.05))
+	var active: float = float(profile.get("active", 0.10))
+	var recovery: float = float(profile.get("recovery", 0.12))
 	var total := startup + active + recovery
 
 	if state_time >= startup and state_time < startup + active:

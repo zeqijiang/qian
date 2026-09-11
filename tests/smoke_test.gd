@@ -14,6 +14,7 @@ func _run() -> void:
 	_test_damage_formula()
 	_test_combo()
 	_test_game_constants()
+	_test_yangjian_kit()
 	if _fails.is_empty():
 		print("=== ALL PASSED ===")
 		quit(0)
@@ -61,3 +62,22 @@ func _test_game_constants() -> void:
 	_ok(GameConstants.REVIVAL_THRESHOLD == 80.0, "revival threshold")
 	_ok(GameConstants.LAYER_HITBOX == 8, "hitbox layer mask")
 	_ok(GameConstants.LAYER_HURTBOX == 16, "hurtbox layer mask")
+
+func _test_yangjian_kit() -> void:
+	var skills := YangJianKit.build_skills()
+	_ok(skills.size() == 5, "yangjian has 5 skills")
+	var ids: Array[String] = []
+	for s in skills:
+		ids.append(s.skill_id)
+		var p := s.to_profile()
+		_ok(p.has("spirit_cost") and p.has("effect_type"), "profile keys for " + s.skill_id)
+	_ok("gui_shou" in ids, "has gui_shou")
+	_ok("gui_ying" in ids, "has gui_ying")
+	_ok("gui_yu" in ids, "has gui_yu")
+	_ok("gui_yan" in ids, "has gui_yan")
+	_ok("ultimate" in ids, "has ultimate")
+	for s in skills:
+		if s.skill_id == "ultimate":
+			_ok(is_equal_approx(s.spirit_cost, 100.0), "ultimate costs full spirit")
+		if s.skill_id == "gui_yu":
+			_ok(s.effect_type == SkillData.EffectType.DOMAIN, "gui_yu is domain")

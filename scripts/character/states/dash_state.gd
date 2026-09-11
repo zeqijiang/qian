@@ -8,14 +8,14 @@ func enter() -> void:
 	if not character:
 		return
 	_dir = character.facing
-	character.velocity.x = _dir * character.stats.dash_speed
+	character.velocity.x = _dir * character.stats.dash_speed * character.domain_speed_mult
 	character.velocity.y = 0.0
 	character.start_dash_trail()
 
 func physics_process(delta: float) -> void:
 	if not character:
 		return
-	character.velocity.x = _dir * character.stats.dash_speed
+	character.velocity.x = _dir * character.stats.dash_speed * character.domain_speed_mult
 	character.apply_gravity(delta)
 	character.move_and_slide()
 

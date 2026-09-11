@@ -6,6 +6,8 @@ signal hp_changed(current: float, max_hp: float)
 signal died(character_id: int)
 signal landed_hit(info: DamageInfo)
 signal state_changed(old_state: String, new_state: String)
+signal domain_changed(active: bool)
+signal skill_cast(skill_id: String)
 
 const GRAVITY := GameConstants.GRAVITY
 
@@ -25,11 +27,22 @@ var can_air_dash: bool = true
 var defense_modifier: float = 1.0
 var state_modifier: float = 1.0
 
+# 灵异机制
+var domain_active: bool = false
+var domain_timer: float = 0.0
+var domain_speed_mult: float = 1.0
+var domain_damage_mult: float = 1.0
+var domain_slow_left: float = 0.0
+var domain_slow_mult: float = 1.0
+var suppress_left: float = 0.0
+var _ultimate_running: bool = false
+
 var state_machine: CharacterStateMachine
 var combat: CombatController
 var energy: EnergyManager
 var input_ctrl: InputController
 var ai: AIController
+var skills: SkillManager
 var visual: PlaceholderVisual
 
 @onready var _hurtbox: Hurtbox = $Hurtbox
@@ -71,6 +84,12 @@ func _ready() -> void:
 	combat.bind_hitbox(_hitbox)
 	_hurtbox.owner_character = self
 	_hitbox.owner_character = self
+
+	skills = SkillManager.new()
+	skills.name = "SkillManager"
+	add_child(skills)
+	skills.setup(self)
+	skills.load_kit_for_character(stats.character_name)
 
 	visual = PlaceholderVisual.new()
 	visual.name = "PlaceholderVisual"
@@ -131,15 +150,189 @@ func _apply_team_collision() -> void:
 		collision_layer = GameConstants.LAYER_ENEMY
 	collision_mask = GameConstants.LAYER_WORLD
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	if is_dead:
 		return
 	if not is_player_controlled and ai:
 		ai.target = Game.get_opponent(self)
-	# Keep facing visual in sync
+	_tick_domain(delta)
+	_tick_suppress(delta)
 	if visual:
 		visual.set_facing(facing)
 		visual.set_blocking(is_blocking)
+		visual.set_domain(domain_active)
+
+func get_move_speed() -> float:
+	var spd := stats.move_speed * domain_speed_mult * domain_slow_mult
+	return spd
+
+func is_suppressed() -> bool:
+	return suppress_left > 0.0
+
+func _tick_domain(delta: float) -> void:
+	if domain_timer > 0.0:
+		domain_timer -= delta
+		if domain_timer <= 0.0:
+			end_domain()
+	if domain_slow_left > 0.0:
+		domain_slow_left -= delta
+		if domain_slow_left <= 0.0:
+			domain_slow_mult = 1.0
+
+func _tick_suppress(delta: float) -> void:
+	if suppress_left > 0.0:
+		suppress_left -= delta
+
+func start_domain(profile: Dictionary) -> void:
+	domain_active = true
+	domain_timer = maxf(domain_timer, float(profile.get("domain_duration", 6.0)))
+	domain_speed_mult = float(profile.get("domain_speed_mult", 1.25))
+	domain_damage_mult = float(profile.get("domain_damage_mult", 1.2))
+	var slow := float(profile.get("domain_enemy_slow", 0.75))
+	for c in Game.characters:
+		if c != self and c is Character:
+			(c as Character).apply_domain_slow(slow, domain_timer)
+	if visual:
+		visual.set_domain(true)
+	domain_changed.emit(true)
+
+func end_domain() -> void:
+	domain_active = false
+	domain_timer = 0.0
+	domain_speed_mult = 1.0
+	domain_damage_mult = 1.0
+	if visual:
+		visual.set_domain(false)
+	domain_changed.emit(false)
+
+func apply_domain_slow(mult: float, duration: float) -> void:
+	domain_slow_mult = mult
+	domain_slow_left = maxf(domain_slow_left, duration)
+
+func apply_suppress(duration: float) -> void:
+	suppress_left = maxf(suppress_left, duration)
+	velocity.x = 0.0
+	if visual:
+		visual.set_flash(1.0)
+
+func schedule_ghost_followup(profile: Dictionary) -> void:
+	var delay := float(profile.get("followup_delay", 0.22))
+	var origin := global_position
+	var dir := float(facing)
+	var dmg := float(profile.get("followup_damage", 28.0))
+	var hitstun := float(profile.get("followup_hitstun", 0.28))
+	var reach := float(profile.get("followup_reach", 72.0))
+	var offset := float(profile.get("followup_offset", 56.0))
+	var timer := get_tree().create_timer(delay)
+	timer.timeout.connect(func() -> void:
+		if is_dead:
+			return
+		_fire_ghost_strike(origin + Vector2(offset * dir, -48.0), dmg, hitstun, reach, dir)
+	)
+
+func _fire_ghost_strike(at: Vector2, damage: float, hitstun: float, reach: float, dir: float) -> void:
+	var target := Game.get_opponent(self)
+	if target == null or not (target is Character):
+		return
+	var tc: Character = target
+	if tc.is_dead or tc.invulnerable:
+		return
+	# Ghost strike is a delayed point hit: range check + apply damage pipeline.
+	var dx := tc.global_position.x - at.x
+	if absf(dx) > reach + 40.0:
+		return
+	if signf(dx) != 0.0 and signf(dir) != 0.0 and signf(dx) != signf(dir):
+		# Allow slight cross-up for ghost style; still require roughly in front unless very close.
+		if absf(dx) > 30.0:
+			return
+	var info := DamageInfo.new()
+	info.base_damage = damage
+	info.skill_multiplier = stats.attack * domain_damage_mult
+	info.hitstun = hitstun
+	info.knockback = 100.0
+	info.attack_name = "gui_ying_followup"
+	tc.on_hit_received(info, self)
+	combat.combo.register_hit("gui_ying_followup", damage)
+	energy.add_spirit(stats.spirit_gain_on_hit)
+	# Ghost flash on caster
+	if visual:
+		visual.set_flash(0.5)
+
+func begin_ultimate(profile: Dictionary) -> void:
+	if _ultimate_running:
+		return
+	_ultimate_running = true
+	start_domain(profile)
+	var hits := int(profile.get("ultimate_hits", 4))
+	var interval := float(profile.get("ultimate_hit_interval", 0.16))
+	var base_dmg := float(profile.get("damage", 22.0))
+	var finisher := float(profile.get("ultimate_finisher_damage", 90.0))
+	_run_ultimate_sequence(hits, interval, base_dmg, finisher, profile)
+
+func _run_ultimate_sequence(hits: int, interval: float, base_dmg: float, finisher: float, profile: Dictionary) -> void:
+	for i in hits:
+		await get_tree().create_timer(interval).timeout
+		if is_dead:
+			_ultimate_running = false
+			return
+		_ultimate_pulse(base_dmg, 0.14, false, i)
+	# Finisher
+	await get_tree().create_timer(interval).timeout
+	if not is_dead:
+		_ultimate_pulse(finisher, 0.4, bool(profile.get("launch", true)), hits)
+	_ultimate_running = false
+
+func _ultimate_pulse(damage: float, hitstun: float, launch: bool, index: int) -> void:
+	var target := Game.get_opponent(self)
+	if target == null or not (target is Character):
+		return
+	var tc: Character = target
+	if tc.is_dead:
+		return
+	# Pull toward target slightly during ultimate
+	var to_t := tc.global_position - global_position
+	if absf(to_t.x) > 70.0:
+		global_position.x += signf(to_t.x) * minf(40.0, absf(to_t.x) - 40.0)
+	face_towards(tc.global_position.x)
+	var info := DamageInfo.new()
+	info.base_damage = damage
+	info.skill_multiplier = stats.attack * domain_damage_mult
+	info.hitstun = hitstun
+	info.knockback = 40.0 if not launch else 80.0
+	info.launch = launch
+	info.launch_velocity = -520.0 if launch else 0.0
+	info.unblockable = index >= 0
+	info.attack_name = "ultimate_%d" % index
+	tc.on_hit_received(info, self)
+	combat.combo.register_hit(info.attack_name, damage)
+	energy.add_spirit(stats.spirit_gain_on_hit * 0.5)
+	if visual:
+		visual.set_flash(0.7)
+
+func get_effective_damage_multiplier() -> float:
+	return domain_damage_mult
+
+func on_landed_hit(info: DamageInfo) -> void:
+	landed_hit.emit(info)
+	# 鬼手 pull on dedicated hit
+	if info and info.attack_name == "gui_shou":
+		var target := Game.get_opponent(self)
+		if target is Character:
+			var tc: Character = target
+			var pull := 320.0
+			var st = skills.get_skill("gui_shou") if skills else null
+			if st:
+				pull = st.pull_force
+			tc.velocity.x = signf(global_position.x - tc.global_position.x) * pull
+	# 鬼眼压制 root
+	if info and info.attack_name == "gui_yan":
+		var target := Game.get_opponent(self)
+		if target is Character:
+			var dur := 0.75
+			var st = skills.get_skill("gui_yan") if skills else null
+			if st:
+				dur = st.suppress_duration
+			(target as Character).apply_suppress(dur)
 
 func apply_gravity(delta: float) -> void:
 	if not is_on_floor():
@@ -179,9 +372,6 @@ func get_state_name() -> String:
 
 func is_airborne() -> bool:
 	return not is_on_floor()
-
-func on_landed_hit(info: DamageInfo) -> void:
-	landed_hit.emit(info)
 
 func on_hit_received(info: DamageInfo, attacker: Character) -> void:
 	if is_dead or invulnerable:
@@ -262,8 +452,14 @@ func reset_for_training(spawn: Vector2) -> void:
 	is_dead = false
 	is_blocking = false
 	invulnerable = false
+	suppress_left = 0.0
+	_ultimate_running = false
+	end_domain()
+	domain_slow_mult = 1.0
+	domain_slow_left = 0.0
 	if visual:
 		visual.set_dead(false)
+		visual.set_domain(false)
 	if energy:
 		energy.reset()
 		energy.set_training_infinite()
