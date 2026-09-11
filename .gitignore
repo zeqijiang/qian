@@ -25,3 +25,6 @@ dist/
 *.exe
 *.x86_64
 *.app
+
+# Temp downloads
+assets/_download/
