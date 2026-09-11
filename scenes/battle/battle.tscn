@@ -1,0 +1,181 @@
+[gd_scene load_steps=8 format=3 uid="uid://bbattle001"]
+
+[ext_resource type="Script" path="res://scripts/battle/battle_controller.gd" id="1_bc"]
+[ext_resource type="Script" path="res://scripts/ui/battle_hud.gd" id="2_hud"]
+[ext_resource type="Script" path="res://scripts/ui/training_room.gd" id="3_room"]
+[ext_resource type="Script" path="res://scripts/character/character.gd" id="4_char"]
+[ext_resource type="PackedScene" path="res://scenes/character/character.tscn" id="5_char_scene"]
+[ext_resource type="Resource" path="res://data/characters/yangjian_stats.tres" id="6_yj"]
+[ext_resource type="Resource" path="res://data/characters/placeholder_enemy_stats.tres" id="7_en"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ground"]
+size = Vector2(1600, 40)
+
+[node name="Battle" type="Node2D"]
+script = ExtResource("1_bc")
+player_stats = ExtResource("6_yj")
+enemy_stats = ExtResource("7_en")
+use_ai = true
+training = true
+round_time = 99.0
+
+[node name="TrainingRoom" type="Node2D" parent="."]
+script = ExtResource("3_room")
+
+[node name="GroundBody" type="StaticBody2D" parent="."]
+position = Vector2(0, 300)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GroundBody"]
+shape = SubResource("RectangleShape2D_ground")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(0, -40)
+zoom = Vector2(1, 1)
+
+[node name="PlayerSpawn" type="Marker2D" parent="."]
+position = Vector2(-160, 200)
+
+[node name="EnemySpawn" type="Marker2D" parent="."]
+position = Vector2(160, 200)
+
+[node name="HUD" type="CanvasLayer" parent="."]
+script = ExtResource("2_hud")
+
+[node name="Root" type="Control" parent="HUD"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+[node name="P1Box" type="VBoxContainer" parent="HUD/Root"]
+offset_left = 24.0
+offset_top = 16.0
+offset_right = 420.0
+offset_bottom = 120.0
+
+[node name="P1Name" type="Label" parent="HUD/Root/P1Box"]
+text = "杨间"
+
+[node name="P1HP" type="ProgressBar" parent="HUD/Root/P1Box"]
+custom_minimum_size = Vector2(360, 22)
+max_value = 1000.0
+value = 1000.0
+show_percentage = false
+
+[node name="P1Spirit" type="ProgressBar" parent="HUD/Root/P1Box"]
+custom_minimum_size = Vector2(360, 12)
+max_value = 100.0
+value = 50.0
+show_percentage = false
+
+[node name="P1Revival" type="ProgressBar" parent="HUD/Root/P1Box"]
+custom_minimum_size = Vector2(360, 10)
+max_value = 100.0
+value = 0.0
+show_percentage = false
+
+[node name="P2Box" type="VBoxContainer" parent="HUD/Root"]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -420.0
+offset_top = 16.0
+offset_right = -24.0
+offset_bottom = 120.0
+grow_horizontal = 0
+
+[node name="P2Name" type="Label" parent="HUD/Root/P2Box"]
+text = "占位敌人"
+horizontal_alignment = 2
+
+[node name="P2HP" type="ProgressBar" parent="HUD/Root/P2Box"]
+custom_minimum_size = Vector2(360, 22)
+max_value = 1000.0
+value = 1000.0
+show_percentage = false
+
+[node name="P2Spirit" type="ProgressBar" parent="HUD/Root/P2Box"]
+custom_minimum_size = Vector2(360, 12)
+max_value = 100.0
+value = 50.0
+show_percentage = false
+
+[node name="P2Revival" type="ProgressBar" parent="HUD/Root/P2Box"]
+custom_minimum_size = Vector2(360, 10)
+max_value = 100.0
+value = 0.0
+show_percentage = false
+
+[node name="TimerLabel" type="Label" parent="HUD/Root"]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -40.0
+offset_top = 16.0
+offset_right = 40.0
+offset_bottom = 48.0
+text = "99"
+horizontal_alignment = 1
+
+[node name="ComboLabel" type="Label" parent="HUD/Root"]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -120.0
+offset_top = 60.0
+offset_right = 120.0
+offset_bottom = 100.0
+text = "0 HIT"
+horizontal_alignment = 1
+visible = false
+
+[node name="ModeLabel" type="Label" parent="HUD/Root"]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -80.0
+offset_top = 100.0
+offset_right = 80.0
+offset_bottom = 128.0
+text = "TRAINING"
+horizontal_alignment = 1
+
+[node name="ResultLabel" type="Label" parent="HUD/Root"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -160.0
+offset_top = -40.0
+offset_right = 160.0
+offset_bottom = 40.0
+text = ""
+horizontal_alignment = 1
+vertical_alignment = 1
+visible = false
+
+[node name="HintLabel" type="Label" parent="HUD/Root"]
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = -40.0
+offset_right = -24.0
+offset_bottom = -12.0
+text = ""
+horizontal_alignment = 1
+
+[node name="DebugLabel" type="Label" parent="HUD/Root"]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = -80.0
+offset_right = 900.0
+offset_bottom = -44.0
+text = ""
+visible = false

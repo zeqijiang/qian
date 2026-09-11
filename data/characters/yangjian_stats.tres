@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="CharacterStats" load_steps=2 format=3 uid="uid://cyangjian"]
+
+[ext_resource type="Script" path="res://scripts/character/character_stats.gd" id="1_stats"]
+
+[resource]
+script = ExtResource("1_stats")
+character_name = "yangjian"
+display_name = "杨间"
+max_hp = 1000.0
+attack = 1.05
+defense = 1.0
+move_speed = 300.0
+jump_velocity = -640.0
+dash_speed = 560.0
+dash_duration = 0.18
+gravity_scale = 1.0
+air_control = 0.7
+max_spirit = 100.0
+max_revival = 100.0
+spirit_gain_on_hit = 9.0
+spirit_gain_on_hurt = 5.5
+revival_gain_on_cast = 6.0
+revival_gain_on_hurt = 3.5
+revival_passive_rate = 0.9
+body_color = Color(0.2, 0.42, 0.92, 1)
+accent_color = Color(0.85, 0.92, 1, 1)
+body_width = 48.0
+body_height = 96.0

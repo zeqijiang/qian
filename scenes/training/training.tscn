@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://btraining001"]
+
+[ext_resource type="PackedScene" path="res://scenes/battle/battle.tscn" id="1_battle"]
+
+[node name="Training" instance=ExtResource("1_battle")]
+training = true
+use_ai = true
