@@ -15,6 +15,8 @@ func _run() -> void:
 	_test_combo()
 	_test_game_constants()
 	_test_yangjian_kit()
+	_test_ye_zhen_kit()
+	_test_registry()
 	if _fails.is_empty():
 		print("=== ALL PASSED ===")
 		quit(0)
@@ -81,3 +83,27 @@ func _test_yangjian_kit() -> void:
 			_ok(is_equal_approx(s.spirit_cost, 100.0), "ultimate costs full spirit")
 		if s.skill_id == "gui_yu":
 			_ok(s.effect_type == SkillData.EffectType.DOMAIN, "gui_yu is domain")
+
+func _test_ye_zhen_kit() -> void:
+	var skills := YeZhenKit.build_skills()
+	_ok(skills.size() == 5, "ye zhen has 5 skills")
+	var ids: Array[String] = []
+	for s in skills:
+		ids.append(s.skill_id)
+	_ok("tie_chong" in ids, "has tie_chong")
+	_ok("beng_quan" in ids, "has beng_quan")
+	_ok("tie_bi" in ids, "has tie_bi")
+	_ok("ba_ti" in ids, "has ba_ti")
+	_ok("ultimate" in ids, "has ultimate")
+	for s in skills:
+		if s.skill_id == "ultimate":
+			_ok(is_equal_approx(s.spirit_cost, 100.0), "ye zhen ultimate cost")
+
+func _test_registry() -> void:
+	_ok(CharacterRegistry.playable_ids().size() == 2, "two playable fighters")
+	var yj := CharacterRegistry.build_stats("yangjian")
+	var yz := CharacterRegistry.build_stats("ye_zhen")
+	_ok(yz.max_hp > yj.max_hp, "ye zhen tankier")
+	_ok(yz.move_speed < yj.move_speed, "ye zhen slower")
+	_ok(yz.attack > yj.attack, "ye zhen stronger")
+	_ok(CharacterRegistry.display_name("ye_zhen") == "叶真", "ye zhen display name")

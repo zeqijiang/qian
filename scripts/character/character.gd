@@ -35,6 +35,8 @@ var domain_damage_mult: float = 1.0
 var domain_slow_left: float = 0.0
 var domain_slow_mult: float = 1.0
 var suppress_left: float = 0.0
+var armor_left: float = 0.0
+var invuln_buff_left: float = 0.0
 var _ultimate_running: bool = false
 
 var state_machine: CharacterStateMachine
@@ -182,6 +184,19 @@ func _tick_domain(delta: float) -> void:
 func _tick_suppress(delta: float) -> void:
 	if suppress_left > 0.0:
 		suppress_left -= delta
+	if armor_left > 0.0:
+		armor_left -= delta
+	if invuln_buff_left > 0.0:
+		invuln_buff_left -= delta
+
+func apply_invuln_buff(duration: float) -> void:
+	invuln_buff_left = maxf(invuln_buff_left, duration)
+	_flash_visual(0.6)
+
+func apply_super_armor(duration: float) -> void:
+	armor_left = maxf(armor_left, duration)
+	if visual:
+		visual.set_flash(0.4)
 
 func start_domain(profile: Dictionary) -> void:
 	domain_active = true
@@ -376,7 +391,22 @@ func is_airborne() -> bool:
 func on_hit_received(info: DamageInfo, attacker: Character) -> void:
 	if is_dead or invulnerable:
 		return
+	if invuln_buff_left > 0.0:
+		return
 	if Debug.invincible and is_player_controlled:
+		return
+	if armor_left > 0.0:
+		# Super armor: take damage, ignore hitstun/knockdown
+		var def_mod := 1.0 / maxf(stats.defense, 0.01) * defense_modifier
+		var dmg := info.compute_damage(def_mod, state_modifier)
+		hp = maxf(0.0, hp - dmg)
+		hp_changed.emit(hp, max_hp)
+		_spawn_damage_popup(dmg, info)
+		_flash_visual(0.35)
+		if energy:
+			energy.add_spirit(stats.spirit_gain_on_hurt * 0.5)
+		if hp <= 0.0:
+			_die()
 		return
 	if is_blocking and not info.unblockable:
 		_apply_block(info, attacker)
@@ -468,6 +498,8 @@ func reset_for_training(spawn: Vector2) -> void:
 	is_blocking = false
 	invulnerable = false
 	suppress_left = 0.0
+	armor_left = 0.0
+	invuln_buff_left = 0.0
 	_ultimate_running = false
 	end_domain()
 	domain_slow_mult = 1.0

@@ -33,7 +33,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event.is_action_pressed("reset_positions"):
 		reset_positions_requested.emit()
 	elif event.is_action_pressed("toggle_mode"):
-		Game.toggle_prefer_training()
+		# Battle scene handles Tab; only flip when coming from non-battle contexts.
+		pass
 	elif event.is_action_pressed("debug_reset") or event.is_action_pressed("restart"):
 		Game.restart_battle()
 

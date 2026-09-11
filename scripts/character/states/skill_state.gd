@@ -32,15 +32,27 @@ func exit() -> void:
 func _apply_special_effect() -> void:
 	_effect_fired = true
 	var et := int(profile.get("effect_type", 0))
+	var sid := str(profile.get("name", ""))
 	match et:
 		int(SkillData.EffectType.DOMAIN):
-			character.start_domain(profile)
+			# Ye Zhen iron wall uses domain fields as a self-buff shell
+			if sid == "tie_bi":
+				character.apply_invuln_buff(float(profile.get("domain_duration", 1.0)))
+			else:
+				character.start_domain(profile)
 		int(SkillData.EffectType.GHOST_SHADOW):
 			character.schedule_ghost_followup(profile)
 		int(SkillData.EffectType.ULTIMATE):
+			if character.stats and character.stats.character_name == "ye_zhen":
+				character.apply_invuln_buff(0.55)
 			character.begin_ultimate(profile)
 		_:
 			pass
+	if sid == "ba_ti":
+		var armor_t: float = float(profile.get("startup", 0.15)) + float(profile.get("active", 0.12))
+		character.apply_super_armor(armor_t)
+	if sid == "tie_chong":
+		character.apply_super_armor(float(profile.get("active", 0.14)) + 0.05)
 
 func physics_process(delta: float) -> void:
 	if not character:

@@ -67,9 +67,13 @@ func _build_skill_bar(player: Character) -> void:
 	root.add_child(box)
 	var order := [
 		["gui_shou", "U"],
+		["tie_chong", "U"],
 		["gui_ying", "I"],
+		["beng_quan", "I"],
 		["gui_yu", "O"],
+		["tie_bi", "O"],
 		["gui_yan", "H"],
+		["ba_ti", "H"],
 		["ultimate", "P"],
 	]
 	for pair in order:
