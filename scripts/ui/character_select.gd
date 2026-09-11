@@ -15,6 +15,8 @@ var _enemies: Array[String] = []
 @onready var _e_name: Label = $Root/EName
 @onready var _e_blurb: Label = $Root/EBlurb
 @onready var _e_color: ColorRect = $Root/EColor
+var _p_sprite: TextureRect
+var _e_sprite: TextureRect
 @onready var _hint: Label = $Root/Hint
 @onready var _btn_p_prev: Button = $Root/BtnPPrev
 @onready var _btn_p_next: Button = $Root/BtnPNext
@@ -37,8 +39,23 @@ func _ready() -> void:
 	_btn_back.pressed.connect(func() -> void:
 		get_tree().change_scene_to_file("res://scenes/ui/main_menu.tscn")
 	)
+	_ready_sprites()
 	_refresh()
 	_btn_start.grab_focus()
+
+func _ready_sprites() -> void:
+	_p_sprite = TextureRect.new()
+	_p_sprite.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_p_sprite.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_p_sprite.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_p_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_p_color.add_child(_p_sprite)
+	_e_sprite = TextureRect.new()
+	_e_sprite.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_e_sprite.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_e_sprite.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_e_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_e_color.add_child(_e_sprite)
 
 func _cycle_player(d: int) -> void:
 	_player_idx = wrapi(_player_idx + d, 0, _roster.size())
@@ -57,6 +74,10 @@ func _refresh() -> void:
 	_e_name.text = CharacterRegistry.display_name(eid)
 	_e_blurb.text = CharacterRegistry.blurb(eid)
 	_e_color.color = CharacterRegistry.color(eid)
+	if _p_sprite:
+		_p_sprite.texture = CharacterRegistry.load_sprite(pid)
+	if _e_sprite:
+		_e_sprite.texture = CharacterRegistry.load_sprite(eid)
 	if Game.prefer_training:
 		_mode_label.text = "训练场 · 对手=%s" % CharacterRegistry.display_name(eid)
 	else:

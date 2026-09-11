@@ -24,6 +24,8 @@ func bind_hitbox(hb: Hitbox) -> void:
 
 func start_attack(profile: Dictionary) -> void:
 	_current_profile = profile
+	if character and character.visual:
+		character.visual.play_attack_punch(1.0)
 	_current_damage = DamageInfo.new()
 	_current_damage.base_damage = float(profile.get("damage", 20.0))
 	_current_damage.hitstun = float(profile.get("hitstun", 0.15))

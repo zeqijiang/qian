@@ -34,6 +34,20 @@ static func color(id: String) -> Color:
 			return Color(0.85, 0.22, 0.28)
 	return Color.GRAY
 
+static func sprite_path(id: String) -> String:
+	match id:
+		"yangjian":
+			return "res://assets/sprites/yangjian.png"
+		"ye_zhen":
+			return "res://assets/sprites/ye_zhen.png"
+	return ""
+
+static func load_sprite(id: String) -> Texture2D:
+	var p := sprite_path(id)
+	if p != "" and ResourceLoader.exists(p):
+		return load(p)
+	return null
+
 static func playable_ids() -> Array[String]:
 	return ["yangjian", "ye_zhen"]
 

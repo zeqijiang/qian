@@ -45,7 +45,7 @@ var energy: EnergyManager
 var input_ctrl: InputController
 var ai: AIController
 var skills: SkillManager
-var visual: PlaceholderVisual
+var visual: FighterSprite
 
 @onready var _hurtbox: Hurtbox = $Hurtbox
 @onready var _hitbox: Hitbox = $Hitbox
@@ -93,8 +93,8 @@ func _ready() -> void:
 	skills.setup(self)
 	skills.load_kit_for_character(stats.character_name)
 
-	visual = PlaceholderVisual.new()
-	visual.name = "PlaceholderVisual"
+	visual = FighterSprite.new()
+	visual.name = "FighterSprite"
 	_visual_root.add_child(visual)
 	visual.setup(stats)
 
@@ -163,6 +163,14 @@ func _physics_process(delta: float) -> void:
 		visual.set_facing(facing)
 		visual.set_blocking(is_blocking)
 		visual.set_domain(domain_active)
+		if state_machine:
+			var st := state_machine.current_state_name
+			if st.begins_with("Attack") or st == "Skill":
+				visual.play_attack_punch(0.85)
+			elif st == "Walk":
+				visual.play_lean(input_ctrl.get_move_axis() if input_ctrl else 0.0)
+			else:
+				visual.play_lean(0.0)
 
 func get_move_speed() -> float:
 	var spd := stats.move_speed * domain_speed_mult * domain_slow_mult
