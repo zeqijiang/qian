@@ -6,6 +6,19 @@
 
 ## 快速开始
 
+### 🎮 免安装包（推荐）
+
+直接下载并运行，无需安装 Godot：
+
+1. 下载 [SpiritRevivalFighting-v1.0.0-win64.zip](https://github.com/zeqijiang/qian/releases)（约 34 MB）
+2. 解压到任意目录
+3. 双击 `SpiritRevivalFighting.exe` 即可开始游戏
+
+**系统要求**：Windows 64位 + DirectX 11+
+**注意事项**：若杀毒软件误报，点「仍要运行」即可（Godot 导出常见）
+
+### 👨‍💻 开发模式
+
 1. 安装 [Godot 4.4.1+](https://godotengine.org/download)
 2. 用 Godot 打开本仓库根目录的 `project.godot`
 3. 按 **F5** 运行 → 主菜单 → 训练 / VS → 选人 → 开战
