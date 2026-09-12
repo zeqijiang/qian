@@ -100,7 +100,8 @@ func _update_sprite(delta: float) -> void:
 	if _sprite == null or texture == null:
 		return
 	var bob := sin(_bob_t * 4.5) * 2.0
-	var sx := _base_scale.x * float(facing)
+	# Source art faces LEFT by default — flip when facing right (facing=+1).
+	var sx := _base_scale.x * -float(facing)
 	var sy := _base_scale.y
 	# Attack punch: stretch forward
 	if _punch > 0.0:
